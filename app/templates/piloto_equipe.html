@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}Cadastro</title>
+</head>
+<body>
+  <h1>Cadastro Piloto na Equipe</h1>
+  <form action="equipe_piloto" id="ep" method="post">
+    <input type="submit" value="Submit">
+  </form>
+  <select id="piloto" name="piloto" form="ep">
+    {% for piloto in pilotos %}
+       <option value="{{ piloto }}">{{ piloto }}</option>
+    {% endfor %}
+  </select>
+  <select id="equipe" name="equipe" form="ep">
+    {% for equipe in equipes %}
+      <option value="{{ equipe }}">{{ equipe }}</option>
+    {% endfor %}
+  </select>
+</body>
+</html>
