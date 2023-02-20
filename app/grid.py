@@ -29,11 +29,8 @@ class Grid:
     def pontuacao_piloto(self, cnx):
         select = "SELECT eq.nome, pi.nome, SUM(po.pontos) FROM pontuacao po, pilotos pi, etapas et, temporadas te, grids gr, equipes eq, piloto_equipe_temporada pet " \
                  "WHERE po.etapa_id = et.id and et.temporada_id = te.id and et.grid_id = gr.id and po.piloto_id = pi.id and pet.piloto_id = pi.id " \
-                 "and pet.equipe_id = eq.id and pet.temporada_id = te.id and gr.id = {} group by eq.nome, pi.nome".format(self.id)
+                 "and pet.equipe_id = eq.id and pet.temporada_id = te.id and gr.id = {} group by eq.nome, pi.nome order by sum(pontos) desc".format(self.id)
         with cnx.cursor() as cur:
             cur.execute(select)
             out = cur.fetchall()
-            print("Equipe\tPiloto\tPontos")
-            print("-------------------------------")
-            for i in out:
-                print("{}\t{}\t{}".format(i[0], i[1], i[2]))
+            return out

@@ -75,6 +75,14 @@ def resultado_temporada(temporada):
     return render_template('table.html', cab=cab, title=temp.nome, out=out)
 
 
+@app.route('/resultado/grid/<grid>')
+def resultado_grid(grid):
+    grid = Grid(grid, "teste")
+    grid.criar(cnx)
+    cab = ['Equipe', 'Piloto', 'Pontos']
+    out = grid.pontuacao_piloto(cnx)
+    return render_template('table.html', cab=cab, title=grid.nome, out=out)
+
 @app.route('/cadastro/piloto', methods=['GET', 'POST'])
 def cadastro_piloto():
     if request.method == 'GET':
@@ -120,6 +128,10 @@ def cadastro_grid():
         grid = Grid(request.form['nome'], request.form['sim'])
         grid.criar(cnx)
         return redirect('/cadastro/grid')
+
+@app.route('/', methods=['GET'])
+def home():
+    return render_template('home.html')
 
 
 def teste():

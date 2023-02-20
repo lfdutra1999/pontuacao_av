@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}Home</title>
+</head>
+<body>
+  <h1>Home</h1>
+  <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+    <option>Cadastro</option>
+    <option value="/cadastro/equipe">equipe</option>
+    <option value="/cadastro/grid">grid</option>
+    <option value="/cadastro/piloto">piloto</option>
+    <option value="/cadastro/equipe_piloto">equipe piloto</option>
+  </select>
+  <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+    <option>Resultado Light</option>
+    <option value="/resultado/grid/LIGHT">LIGHT</option>
+    <option value="/resultado/etapa/T16-E1-LIGHT">T16-E1-LIGHT</option>
+    <option value="/resultado/etapa/T16-E2-LIGHT">T16-E2-LIGHT</option>
+  </select>
+  <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+    <option>Resultado F3</option>
+    <option value="/resultado/grid/F3">F3</option>
+    <option value="/resultado/etapa/T16-E1-F3">T16-E1-F3</option>
+    <option value="/resultado/etapa/T16-E2-F3">T16-E2-F3</option>
+  </select>
+  <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+    <option>Resultado LIGHT AM</option>
+    <option value="/resultado/grid/LIGHT-AM">LIGHT-AM</option>
+    <option value="/resultado/etapa/T16-E1-LIGHT-AM">T16-E1-LIGHT-AM</option>
+    <option value="/resultado/etapa/T16-E2-LIGHT-AM">T16-E2-LIGHT-AM</option>
+  </select>
+  <select onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+    <option>Resultado Temporada</option>
+    <option value="/resultado/temporada/T16">T16</option>
+  </select>
+</body>
+</html>
