@@ -2,10 +2,11 @@ import mysql.connector
 from equipe import Equipe
 from piloto import Piloto
 from etapa import Etapa
+from bateria import Bateria
 from grid import Grid
 from temporada import Temporada
 from random import randint
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, jsonify
 
 cnx = mysql.connector.connect(user='rpm', password='meuovo', host='127.0.0.1', database='rpmesports')
 app = Flask(__name__)
@@ -35,99 +36,187 @@ def print_pontos():
         cont += 1
 
 
-def get_pilotos():
-    select = "SELECT nome FROM pilotos"
+@app.route('/temporadas', methods=['GET'])
+def get_temporadas():
+    select = "SELECT id, nome  FROM temporadas order by id"
+    temporadas = []
+    with cnx.cursor() as cur:
+        cur.execute(select)
+        out = cur.fetchall()
+        for temporada in out:
+            temporadas.append({"id": temporada[0], "nome": temporada[1]})
+    return jsonify(temporadas)
+
+
+@app.route('/pilotos/<temporada>', methods=['GET'])
+def get_pilotos(temporada):
+    select = "SELECT pi.nome FROM pilotos pi, piloto_equipe_temporada pet, temporadas te where pi.id = pet.piloto_id and " \
+             "pet.temporada_id = te.id and te.nome = \'{}\'".format(temporada)
     pilotos = []
     with cnx.cursor() as cur:
         cur.execute(select)
         out = cur.fetchall()
         for piloto in out:
-            pilotos.append(piloto[0])
-    return pilotos
+            p = Piloto(piloto[0])
+            p.criar(cnx)
+            pilotos.append(p.serialize())
+    return jsonify(pilotos)
 
 
-def get_equipes():
-    select = "SELECT nome FROM equipes"
+@app.route('/equipes/<temporada>', methods=['GET'])
+def get_equipes(temporada):
+    select = "SELECT distinct eq.nome FROM equipes eq, piloto_equipe_temporada pet, temporadas te where eq.id = pet.equipe_id and " \
+             "pet.temporada_id = te.id and te.nome = \'{}\'".format(temporada)
     equipes = []
     with cnx.cursor() as cur:
         cur.execute(select)
         out = cur.fetchall()
         for equipe in out:
-            equipes.append(equipe[0])
-    return equipes
+            e = Equipe(equipe[0])
+            e.criar(cnx)
+            equipes.append(e.serialize())
+    return jsonify(equipes)
+
+
+@app.route('/grids/<temporada>', methods=['GET'])
+def get_grids(temporada):
+    select = "SELECT DISTINCT gr.id, gr.nome FROM grids gr, etapas et, temporadas te WHERE gr.id = et.grid_id and " \
+             "et.temporada_id = te.id and te.nome = \'{}\'".format(temporada)
+    grids = []
+    with cnx.cursor() as cur:
+        cur.execute(select)
+        out = cur.fetchall()
+        for grid in out:
+            select = "SELECT posicao, pontos from grid_pontos where grid_id = {}".format(grid[0])
+            pontos =[]
+            with cnx.cursor() as cur2:
+                cur2.execute(select)
+                out2 = cur2.fetchall()
+                for ponto in out2:
+                    pontos.append({"posicao": ponto[0], "pontos": ponto[1]})
+            grids.append({"id": grid[0], "nome": grid[1], "pontuacao": pontos})
+    return jsonify(grids)
+
+
+@app.route('/resultado/bateria/<bateria>')
+def resultado_bateria(bateria):
+    bat = Bateria(bateria, 1, 1)
+    bat.criar(cnx)
+    out = bat.pontuacao_bateria(cnx)
+    return jsonify(out)
 
 
 @app.route('/resultado/etapa/<etapa>')
 def resultado_etapa(etapa):
     et = Etapa(etapa, 1, 1)
     et.criar(cnx)
-    cab = ['Posicao', 'Piloto', 'Equipe', 'Pontos']
-    out = et.print_pontuacao(cnx)
-    return render_template('table.html', cab=cab, title=et.nome, out=out)
+    out = et.pontuacao_etapa(cnx)
+    return jsonify(out)
 
 
 @app.route('/resultado/temporada/<temporada>')
 def resultado_temporada(temporada):
     temp = Temporada(temporada)
     temp.criar(cnx)
-    cab = ['Equipe', 'Pontos']
     out = temp.pontos_equipe(cnx)
-    return render_template('table.html', cab=cab, title=temp.nome, out=out)
+    return jsonify(out)
 
 
 @app.route('/resultado/grid/<grid>')
 def resultado_grid(grid):
     grid = Grid(grid, "teste")
     grid.criar(cnx)
-    cab = ['Equipe', 'Piloto', 'Pontos']
     out = grid.pontuacao_piloto(cnx)
-    return render_template('table.html', cab=cab, title=grid.nome, out=out)
+    return jsonify(out)
 
-@app.route('/cadastro/piloto', methods=['GET', 'POST'])
+
+@app.route('/cadastro/piloto', methods=['POST'])
 def cadastro_piloto():
-    if request.method == 'GET':
-        return render_template('cadastro_piloto.html')
-    if request.method == 'POST':
-        piloto = Piloto(request.form['nome'])
+    try:
+        content = request.json
+        piloto = Piloto(content['nome'], content['steam_id'])
         piloto.criar(cnx)
-        return redirect('/cadastro/piloto')
+        return "Piloto Cadastrado com sucesso", 200
+    except Exception as e:
+        print(e)
+        return "erro", 500
 
 
-@app.route('/cadastro/equipe', methods=['GET', 'POST'])
+@app.route('/cadastro/equipe', methods=['POST'])
 def cadastro_equipe():
-    if request.method == 'GET':
-        return render_template('cadastro_equipe.html')
-    if request.method == 'POST':
-        equipe = Equipe(request.form['nome'])
+    try:
+        content = request.json
+        equipe = Equipe(content['nome'])
         equipe.criar(cnx)
-        return redirect('/cadastro/equipe')
+        return "Equipe Criada com sucesso.", 200
+    except Exception as e:
+        print(e)
+        return "erro", 500
 
 
-@app.route('/cadastro/equipe_piloto', methods=['GET', 'POST'])
+@app.route('/cadastro/equipe_piloto', methods=['POST'])
 def cadastro_equipe_piloto():
-    if request.method == 'GET':
-        pilotos = get_pilotos()
-        equipes = get_equipes()
-        return render_template('piloto_equipe.html', pilotos=pilotos, equipes=equipes)
-    if request.method == 'POST':
-        temporada = Temporada('T16')
+    try:
+        content = request.json
+        temporada = Temporada(content['temporada'])
         temporada.criar(cnx)
-        piloto = Piloto(request.form['piloto'])
+        piloto = Piloto(content['piloto'])
         piloto.criar(cnx)
-        equipe = Equipe(request.form['equipe'])
+        equipe = Equipe(content['equipe'])
         equipe.criar(cnx)
         temporada.relacionar_piloto_equipe(cnx, piloto.id, equipe.id)
-        return redirect('/cadastro/equipe_piloto')
+        return "Piloto {} atrelado a equipe {} na temporada {}".format(piloto.nome, equipe.nome, temporada.nome), 200
+    except Exception as e:
+        print(e)
+        return "erro", 500
 
 
-@app.route('/cadastro/grid', methods=['GET', 'POST'])
+@app.route('/cadastro/grid', methods=['POST'])
 def cadastro_grid():
-    if request.method == 'GET':
-        return render_template('cadastro_grid.html')
-    if request.method == 'POST':
-        grid = Grid(request.form['nome'], request.form['sim'])
+    try:
+        content = request.json
+        grid = Grid(content['nome'], content['sim'], content['pontos'])
         grid.criar(cnx)
-        return redirect('/cadastro/grid')
+        return "Grid {} criado com sucesso".format(grid.nome)
+    except Exception as e:
+        print(e)
+        return "erro", 500
+
+
+@app.route('/cadastro/etapa', methods=['POST'])
+def cadastro_etapa():
+    content = request.json
+    temporada = Temporada(content['temporada'])
+    temporada.criar(cnx)
+    grid = Grid(content['grid'])
+    grid.criar(cnx)
+    etapa = Etapa(content['etapa'], grid.id, temporada.id, content['multiplicador'])
+    etapa.criar(cnx)
+    return "Etapa {} criada para o grid {} na temporada {}".format(etapa.nome, grid.nome, temporada.nome)
+
+
+@app.route('/cadastro/bateria', methods=['POST'])
+def cadastro_bateria():
+    content = request.json
+    etapa = Etapa(content['etapa'])
+    etapa.criar(cnx)
+    bateria = Bateria(content['nome'], etapa.id, content['multiplicador'])
+    bateria.criar(cnx)
+    return "Bateria {} criada para a etapa {}".format(bateria.nome, etapa.nome)
+
+
+@app.route('/pontuacao/<bateria>', methods=['POST'])
+def pontuacao(bateria):
+    bat = Bateria(bateria)
+    bat.criar(cnx)
+    content = request.json
+    for linha in content['pontos']:
+        piloto = Piloto(linha[0])
+        print(piloto.nome)
+        piloto.criar(cnx)
+        bat.pontuacao(cnx, linha[1], piloto.id)
+    return "Pontuação da bateria {} aplicada com sucesso".format(bateria)
+
 
 @app.route('/', methods=['GET'])
 def home():
@@ -152,28 +241,42 @@ def teste():
         equipe_id = randint(1, 3)
         temporada.relacionar_piloto_equipe(cnx, piloto.id, equipe_id)
     # Criar grids
-    grids = [Grid("LIGHT", "AMS2"), Grid("F3", "AC"), Grid("LIGHT-AM", "ACC")]
+    grids = [Grid("LIGHT", "AMS2", [[1, 25], [2, 20], [3, 18], [4, 16], [5, 14], [6, 12]]),
+             Grid("F3", "AC", [[1, 29], [2, 25], [3, 20], [4, 18], [5, 16], [6, 14]]),
+             Grid("LIGHT-AM", "ACC", [[1, 35], [2, 30], [3, 25], [4, 20], [5, 18], [6, 16]])]
     for grid in grids:
         grid.criar(cnx)
-    with cnx.cursor() as cur:
-        insert = "INSERT INTO grid_pontos (grid_id, posicao, pontos) VALUES (1, 1, 25), (1, 2, 20), (1, 3, 18), (1, 4, 16), (1, 5, 14), (1, 6, 12), (2, 1, 29), (2, 2, 25), (2, 3, 20), (2, 4, 18), (2, 5, 16), (2, 6, 14), (3, 1, 35), (3, 2, 29), (3, 3, 25), (3, 4, 22), (3, 5, 20), (3, 6, 18)"
-        cur.execute(insert)
-        cnx.commit()
-    # Criar etapas
-    etapas = [Etapa("T16-E1-LIGHT", 1, 1), Etapa("T16-E2-LIGHT", 1, 1), Etapa("T16-E1-F3", 2, 1),
-              Etapa("T16-E2-F3", 2, 1), Etapa("T16-E1-LIGHT-AM", 3, 1), Etapa("T16-E2-LIGHT-AM", 3, 1)]
+    # Criar etapas e baterias
+    etapas = [Etapa("T16-E1-LIGHT", 1, 1, 1), Etapa("T16-E2-LIGHT", 1, 1, 1), Etapa("T16-E1-F3", 2, 1, 1),
+              Etapa("T16-E2-F3", 2, 1, 1), Etapa("T16-E1-LIGHT-AM", 3, 1, 1), Etapa("T16-E2-LIGHT-AM", 3, 1, 1)]
+    baterias = []
     for etapa in etapas:
         etapa.criar(cnx)
-        etapa.pontos_etapa(cnx)
-        # Pontuacao
-        posicao = 1
-        for piloto in pilotos:
-            etapa.pontuacao(cnx, posicao, piloto.id)
-            posicao += 1
-        etapa.print_pontuacao(cnx)
-        for grid in grids:
-            grid.pontuacao_piloto(cnx)
-        temporada.pontos_equipe(cnx)
+        contador = 1
+        if etapa.id == 3 or etapa.id == 4:
+            while contador <= 2:
+                if contador == 1:
+                    bateria = Bateria("{}-B{}{}".format(etapa.nome[:6], contador, etapa.nome[etapa.nome.rfind('-'):]),
+                                      etapa.id, 1)
+                else:
+                    bateria = Bateria("{}-B{}{}".format(etapa.nome[:6], contador, etapa.nome[etapa.nome.rfind('-'):]),
+                                      etapa.id, 0.5)
+                bateria.criar(cnx)
+                baterias.append(bateria)
+                contador += 1
+        else:
+            bateria = Bateria("{}-B1{}".format(etapa.nome[:6], etapa.nome[etapa.nome.rfind('-'):]), etapa.id, 1)
+            bateria.criar(cnx)
+            baterias.append(bateria)
+    # Pontuacao
+    for etapa in etapas:
+        for bateria in baterias:
+            if etapa.id == bateria.etapa_id:
+                posicao = 1
+                bateria.criar(cnx)
+                for piloto in pilotos:
+                    bateria.pontuacao(cnx, posicao, piloto.id)
+                    posicao += 1
 
 
 if __name__ == "__main__":

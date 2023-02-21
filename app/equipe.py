@@ -8,7 +8,6 @@ class Equipe:
         with cnx.cursor() as cur:
             cur.execute(select)
             out = cur.fetchone()
-            print(out[0])
             self.id = out[0]
 
     def existe(self, cnx):
@@ -26,3 +25,9 @@ class Equipe:
                 cur.execute(insert)
                 cnx.commit()
         self.set_id(cnx)
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "nome": self.nome
+        }
