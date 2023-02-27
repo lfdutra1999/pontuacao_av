@@ -1,15 +1,14 @@
 class Etapa:
-    def __init__(self, nome, grid_id, temporada_id):
-        self.pontos = None
-        self.id = None
+    def __init__(self, nome, grid_id=0, temporada_id=0, multiplicador=1):
         self.nome = nome
         self.grid_id = grid_id
         self.temporada_id = temporada_id
-        self.multiplicador = 1
+        self.multiplicador = multiplicador
+        self.pontos = None
+        self.id = None
 
     def set_id(self, cnx):
         select = "SELECT id FROM etapas WHERE nome = \'{}\'".format(self.nome)
-        print(select)
         with cnx.cursor() as cur:
             cur.execute(select)
             out = cur.fetchone()
@@ -20,7 +19,6 @@ class Etapa:
         with cnx.cursor() as cur:
             cur.execute(select)
             out = cur.fetchone()
-            print(out)
             if out[0] == 0: return True
             return False
 
@@ -54,15 +52,26 @@ class Etapa:
             out = cur.fetchall()
             self.pontos = out
 
-    def print_pontuacao(self, cnx):
-        select = "SELECT po.posicao, pi.nome, eq.nome, po.pontos FROM pontuacao po, etapas et, temporadas te, grids gr, pilotos pi, equipes eq, piloto_equipe_temporada pet " \
-                 "WHERE po.etapa_id = et.id and et.temporada_id = te.id and et.grid_id = gr.id and po.piloto_id = pi.id and pi.id = pet.piloto_id and eq.id = pet.equipe_id and te.id = pet.temporada_id  " \
-                 " and et.id = {} order by po.posicao".format(self.id)
+    def pontuacao_etapa(self, cnx):
+        select = "SELECT pi.nome, eq.nome, sum(po.pontos) FROM pontuacao po, etapas et, temporadas te, grids gr, pilotos pi, equipes eq, " \
+                 "piloto_equipe_temporada pet, baterias ba WHERE po.bateria_id = ba.id and et.temporada_id = te.id and et.grid_id = gr.id and " \
+                 "po.piloto_id = pi.id and pi.id = pet.piloto_id and eq.id = pet.equipe_id and te.id = pet.temporada_id  and ba.etapa_id = et.id and " \
+                 "ba.etapa_id = {} group by pi.nome, eq.nome order by sum(po.pontos) desc".format(self.id)
+        print(select)
         with cnx.cursor() as cur:
             cur.execute(select)
             out = cur.fetchall()
-            return out
-            #print("Piloto\tEquipe\tPosicao\tPontos")
-            #print("-------------------------------")
-            #for i in out:
-            #    print("{}\t{}\t{}\t{}".format(i[0], i[1], i[2], i[3]))
+            retorno = []
+            for linha in out:
+                retorno.append(self.serialize_pontuacao(linha))
+            return retorno
+
+    def serialize_pontuacao(self, list):
+        nome = list[0]
+        equipe = list[1]
+        pontos = list[2]
+        return {
+            "nome": nome,
+            "equipe": equipe,
+            "pontos": pontos
+        }
