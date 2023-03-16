@@ -91,7 +91,7 @@ class Piloto:
         ]
 
     def atualiza_info(self, coluna, valor):
-        return "UPDATE piloto_informacoes set {coluna}={valor}".format(coluna=coluna, valor=valor)
+        return "UPDATE piloto_informacoes set {coluna}=\'{valor}\'".format(coluna=coluna, valor=valor)
 
     def serialize(self):
         return {
