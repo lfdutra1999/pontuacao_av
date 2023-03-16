@@ -1,5 +1,6 @@
+create database rpmesports CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE rpmesports;
-drop tables temporadas, equipes, pilotos, piloto_equipe_temporada, grids, etapas, grid_pontos, pontuacao, baterias;
+drop tables temporadas, equipes, piloto, piloto_informacoes, piloto_equipe_temporada, grids, etapas, grid_pontos, pontuacao, baterias;
 
 CREATE TABLE temporadas (
     id INT NOT NULL AUTO_INCREMENT,
@@ -15,14 +16,30 @@ CREATE TABLE equipes (
     UNIQUE (nome)
 );
 
-CREATE TABLE pilotos (
-    id INT NOT NULL AUTO_INCREMENT,
-    nome VARCHAR(128) NOT NULL,
-    steam_id VARCHAR(128),
-    PRIMARY KEY (id),
-    UNIQUE (nome),
-    UNIQUE (steam_id)
+CREATE TABLE piloto (
+    uuid BINARY(16) PRIMARY KEY,
+    username VARCHAR(128) NOT NULL UNIQUE,
+    password VARCHAR(64),
+    isAdmin INT(1)
 );
+
+CREATE TABLE piloto_informacoes (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    piloto_uuid BINARY(16),
+    nome VARCHAR(32) NOT NULL,
+    sobrenome VARCHAR(128) NOT NULL,
+    nickname VARCHAR(128) NOT NULL,
+    steamid VARCHAR(32) NOT NULL,
+    whatsapp VARCHAR(11) NOT NULL,
+    chavepix VARCHAR(256) NOT NULL,
+    cidade VARCHAR(128),
+    estado VARCHAR(2),
+    controlador VARCHAR(128),
+    linkcanal VARCHAR(128),
+    foto varchar(128),
+    FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
+);
+
 
 CREATE TABLE piloto_equipe_temporada (
     id INT NOT NULL AUTO_INCREMENT,
@@ -30,7 +47,7 @@ CREATE TABLE piloto_equipe_temporada (
     equipe_id INT NOT NULL,
     temporada_id INT NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (piloto_id) REFERENCES pilotos(id),
+    FOREIGN KEY (piloto_id) REFERENCES piloto(id),
     FOREIGN KEY (equipe_id) REFERENCES equipes(id),
     FOREIGN KEY (temporada_id) REFERENCES temporadas(id)
 );

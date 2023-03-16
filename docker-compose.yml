@@ -1,0 +1,35 @@
+services:
+  api:
+    image: rpm-api
+    build: ./app/
+    ports:
+      - "8008:8008"
+    networks:
+      - front-tier
+      - back-tier
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'rpmesports'
+      MYSQL_USER: 'rpm'
+      MYSQL_PASSWORD: 'meuovo'
+      MYSQL_ROOT_PASSWORD: 'meuoco'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    networks:
+      - front-tier
+      - back-tier
+    volumes:
+      - my-db:/var/lib/mysql
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+
+volumes:
+  my-db:
+
+networks:
+  front-tier: {}
+  back-tier: {}
