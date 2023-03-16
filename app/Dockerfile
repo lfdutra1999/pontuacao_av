@@ -1,5 +1,5 @@
 FROM python:3.8-slim-buster
-EXPOSE 5000
+EXPOSE 8008
 
 WORKDIR /python-docker
 
