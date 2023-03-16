@@ -2,6 +2,8 @@ services:
   api:
     image: rpm-api
     build: ./app/
+    depends_on:
+      - db
     ports:
       - "8008:8008"
     networks:
