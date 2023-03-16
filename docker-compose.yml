@@ -25,6 +25,7 @@ services:
       - back-tier
     volumes:
       - my-db:/var/lib/mysql
+      - "./db/initial.sql:/docker-entrypoint-initdb.d/1.sql"
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
 
 volumes:
