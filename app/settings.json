@@ -32,7 +32,7 @@
                 "DEVELOPMENT": true,
                 "DATABASE_CONNECTION_OPTIONS": {
                     "DATABASE": "MySQL",
-                    "DB_HOST": "db",
+                    "DB_HOST": "172.31.6.61",
                     "DB_PORT": 3306,
                     "DB_USER": "rpm",
                     "DB_PASSWD": "meuovo",
