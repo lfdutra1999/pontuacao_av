@@ -96,8 +96,10 @@ def get_piloto():
             return response
         elif request.method == 'PUT':
             content = request.json
+            print(content)
             piloto = Piloto(uuid)
             query = piloto.atualiza_info(content['label'], content['valor'])
+            print(query)
             db.run_query(query=query)
             response = get_response_msg(["piloto atualizado"], HTTPStatus.OK)
             db.close_connection()
