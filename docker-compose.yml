@@ -12,13 +12,13 @@ services:
       - back-tier
 
   db:
-    image: mysql:5.7
+    image: mysql:latest
     restart: always
     environment:
       MYSQL_DATABASE: 'rpmesports'
       MYSQL_USER: 'rpm'
       MYSQL_PASSWORD: 'meuovo'
-      MYSQL_ROOT_PASSWORD: 'meuoco'
+      MYSQL_ROOT_PASSWORD: 'meuovo'
     ports:
       - '3306:3306'
     expose:
@@ -28,7 +28,6 @@ services:
       - back-tier
     volumes:
       - my-db:/var/lib/mysql
-      - "./db/initial.sql:/docker-entrypoint-initdb.d/1.sql"
     healthcheck:
       test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
       timeout: 20s

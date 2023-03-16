@@ -1,11 +1,11 @@
 USE rpmesports;
-
+drop table piloto_informacoes, piloto;
 CREATE TABLE piloto (
     uuid BINARY(16) PRIMARY KEY,
     username VARCHAR(128) NOT NULL UNIQUE,
     password VARCHAR(64),
     isAdmin INT(1)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE piloto_informacoes (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -22,4 +22,4 @@ CREATE TABLE piloto_informacoes (
     linkcanal VARCHAR(128),
     foto varchar(128),
     FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
