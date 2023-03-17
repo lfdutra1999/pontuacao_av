@@ -41,7 +41,8 @@ def get_response_msg(data, status_code):
 def json_login(dados):
     return {
         "uuid": dados[0],
-        "senha": dados[1]
+        "senha": dados[1],
+        "isAdmin": dados[2]
     }
 
 
@@ -115,7 +116,7 @@ def get_piloto():
 def login():
     try:
         username = request.args.get('username', type=str)
-        query = "SELECT BIN_TO_UUID(uuid), password FROM piloto where username='{username}'".format(
+        query = "SELECT BIN_TO_UUID(uuid), password, isAdmin FROM piloto where username='{username}'".format(
             username=username)
         records = db.run_query(query=query)
         response = get_response_msg(json_login(records[0]), HTTPStatus.OK)
