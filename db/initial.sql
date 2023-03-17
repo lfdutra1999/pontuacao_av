@@ -23,3 +23,28 @@ CREATE TABLE piloto_informacoes (
     foto varchar(128),
     FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE temporada (
+    uuid BINARY(16) PRIMARY KEY,
+    nome VARCHAR(128) NOT NULL,
+    dtInicio DATE NOT NULL,
+    dtFim DATE NOT NULL,
+    UNIQUE (nome)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE equipe (
+    uuid BINARY(16) PRIMARY KEY,
+    nome VARCHAR(128) NOT NULL,
+    foto varchar(128),
+    UNIQUE (nome)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE piloto_equipe_temporada (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    temporada_uuid BINARY(16),
+    equipe_uuid BINARY(16),
+    piloto_uuid BINARY(16),
+    FOREIGN KEY (temporada_uuid) REFERENCES temporada(uuid),
+    FOREIGN KEY (equipe_uuid) REFERENCES equipe(uuid),
+    FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;

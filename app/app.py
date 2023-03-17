@@ -72,7 +72,7 @@ def get_pilotos():
 
 ## /api/v1/piloto
 @app.route(f"{route_prefix}/piloto", methods=['GET', 'POST', 'PUT'])
-def get_piloto():
+def api_piloto():
     try:
         uuid = request.args.get('uuid', type=str)
         if request.method == 'GET':
@@ -113,7 +113,7 @@ def get_piloto():
 
 ## /api/v1/pilotos
 @app.route(f"{route_prefix}/login", methods=['GET'])
-def login():
+def api_login():
     try:
         username = request.args.get('username', type=str)
         query = "SELECT BIN_TO_UUID(uuid), password, isAdmin FROM piloto where username='{username}'".format(
@@ -122,6 +122,45 @@ def login():
         response = get_response_msg(json_login(records[0]), HTTPStatus.OK)
         db.close_connection()
         return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
+## /api/v1/temporada
+@app.route(f"{route_prefix}/temporada", methods=['GET', 'POST', 'PUT'])
+def api_temporada():
+    try:
+        uuid = request.args.get('uuid', type=str)
+        if request.method == 'GET':
+            temporada = Temporada(uuid)
+            query = temporada.select()
+            records = db.run_query(query=query)
+            temporada.set_informacoes(records[0])
+            response = get_response_msg(temporada.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'POST':
+            content = request.json
+            print(content)
+            temporada = Temporada(uuid, content['nome'], content['dtInicio'], content['dtFim'])
+            query = temporada.criar()
+            print(query)
+            db.run_query(query=query)
+            response = get_response_msg(temporada.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        # elif request.method == 'PUT':
+        #     content = request.json
+        #     temporada = Temporada(uuid)
+        #     query = piloto.atualiza_info(content['label'], content['valor'])
+        #     db.run_query(query=query)
+        #     response = get_response_msg(["piloto atualizado"], HTTPStatus.OK)
+        #     db.close_connection()
+        #     return response
+        else:
+            print(1)
     except pymysql.MySQLError as sqle:
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
     except Exception as e:

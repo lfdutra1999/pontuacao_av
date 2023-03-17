@@ -1,3 +1,6 @@
+"DB_HOST": "15.228.232.102",
+"DB_HOST": "127.0.0.1",
+
 create database rpmesports CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
 USE rpmesports;
 drop tables temporadas, equipes, piloto, piloto_informacoes, piloto_equipe_temporada, grids, etapas, grid_pontos, pontuacao, baterias;
