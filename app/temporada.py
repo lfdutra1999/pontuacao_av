@@ -14,7 +14,7 @@ class Temporada:
             return False
 
     def criar(self):
-        return "INSERT INTO temporada VALUES (UUID_TO_BIN(\'{uuid}\'), \'{nome}\', \'{dt_inicio}\', \'{dt_fim}\')".format(
+        return "INSERT INTO temporada VALUES (UUID_TO_BIN(\'{uuid}\'), \'{nome}\', DATE_FORMAT(\'{dt_inicio}\', \"%Y-%m-%d\"), DATE_FORMAT(\'{dt_fim}\', \"%Y-%m-%d\"))".format(
             uuid=self.uuid, nome=self.nome, dt_inicio=self.dt_inicio, dt_fim=self.dt_fim)
 
     def select(self):
