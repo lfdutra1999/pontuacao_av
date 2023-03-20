@@ -71,8 +71,8 @@ class Grid:
             "temporada_uuid": self.temporada_uuid,
             "nome": self.nome,
             "simulador": self.simulador,
-            "dia_da_semana": self.dia_da_semana,
-            "link_onboard": self.link_onboard
+            "diaDaSemana": self.dia_da_semana,
+            "linkOnboard": self.link_onboard
         }
 
     def serialize_pontuacao(self, lst):
