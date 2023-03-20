@@ -220,7 +220,7 @@ def api_grid():
             return response
         elif request.method == 'POST':
             content = request.json
-            grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['dia_da_semana'], content['link_onboard'])
+            grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['diaDaSemana'], content['linkOnboard'])
             query = grid.criar()
             db.run_query(query=query)
             response = get_response_msg(grid.serialize(), HTTPStatus.OK)
@@ -228,7 +228,7 @@ def api_grid():
             return response
         elif request.method == 'PUT':
              content = request.json
-             grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['dia_da_semana'], content['link_onboard'])
+             grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['diaDaSemana'], content['linkOnboard'])
              query = grid.atualizar()
              db.run_query(query=query)
              response = get_response_msg(grid.serialize(), HTTPStatus.OK)
