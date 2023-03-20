@@ -14,12 +14,18 @@ class Temporada:
             return False
 
     def criar(self):
-        return "INSERT INTO temporada VALUES (UUID_TO_BIN(\'{uuid}\'), \'{nome}\', DATE_FORMAT(\'{dt_inicio}\', \"%Y-%m-%d\"), DATE_FORMAT(\'{dt_fim}\', \"%Y-%m-%d\"))".format(
-            uuid=self.uuid, nome=self.nome, dt_inicio=self.dt_inicio, dt_fim=self.dt_fim)
+        return "INSERT INTO temporada VALUES (UUID_TO_BIN(\'{uuid}\'), \'{nome}\', DATE_FORMAT(\'{dt_inicio}\', \"%Y-%m-%d\")," \
+               " DATE_FORMAT(\'{dt_fim}\', \"%Y-%m-%d\"))".format(uuid=self.uuid, nome=self.nome,
+                                                                  dt_inicio=self.dt_inicio, dt_fim=self.dt_fim)
 
     def select(self):
-        return "SELECT BIN_TO_UUID(uuid), nome,  DATE_FORMAT(dtInicio, \"%Y-%m-%d\"), DATE_FORMAT(dtFim, \"%Y-%m-%d\") from temporada where BIN_TO_UUID(uuid) = \'{uuid}\'".format(
-            uuid=self.uuid)
+        return "SELECT BIN_TO_UUID(uuid), nome,  DATE_FORMAT(dtInicio, \"%Y-%m-%d\"), DATE_FORMAT(dtFim, \"%Y-%m-%d\") " \
+               "FROM temporada where BIN_TO_UUID(uuid) = \'{uuid}\'".format(uuid=self.uuid)
+
+    def atualizar(self):
+        return "UPDATE temporada set nome=\'{nome}\', dtInicio =  DATE_FORMAT(\'{dt_inicio}\', \"%Y-%m-%d\"), " \
+               "dtFim =  DATE_FORMAT(\'{dt_fim}\', \"%Y-%m-%d\") WHERE BIN_TO_UUID(uuid) = \'{uuid}\'".format(
+            uuid=self.uuid, nome=self.nome, dt_inicio=self.dt_inicio, dt_fim=self.dt_fim)
 
     def set_informacoes(self, lista):
         self.nome = lista[1]

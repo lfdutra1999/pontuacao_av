@@ -170,14 +170,14 @@ def api_temporada():
             response = get_response_msg(temporada.serialize(), HTTPStatus.OK)
             db.close_connection()
             return response
-        # elif request.method == 'PUT':
-        #     content = request.json
-        #     temporada = Temporada(uuid)
-        #     query = piloto.atualiza_info(content['label'], content['valor'])
-        #     db.run_query(query=query)
-        #     response = get_response_msg(["piloto atualizado"], HTTPStatus.OK)
-        #     db.close_connection()
-        #     return response
+        elif request.method == 'PUT':
+             content = request.json
+             temporada = Temporada(uuid, content['nome'], content['dtInicio'], content['dtFim'])
+             query = temporada.atualizar()
+             db.run_query(query=query)
+             response = get_response_msg(["Temporada atualizada"], HTTPStatus.OK)
+             db.close_connection()
+             return response
         else:
             print(1)
     except pymysql.MySQLError as sqle:
