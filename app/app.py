@@ -191,7 +191,7 @@ def api_temporada():
 def api_grids():
     try:
         grids = []
-        query = 'SELECT UUID_TO_BIN(uuid), UUID_TO_BIN(temporada_uuid), nome, simulador, dia_da_semana, link_onboard FROM grid'
+        query = 'SELECT BIN_TO_UUID(uuid), UUID_TO_BIN(temporada_uuid), nome, simulador, dia_da_semana, link_onboard FROM grid'
         records = db.run_query(query=query)
         for row in records:
             grid = Grid(row[0], row[1], row[2], row[3], row[4], row[5])
