@@ -5,6 +5,7 @@ from etapa import Etapa
 from bateria import Bateria
 from grid import Grid
 from temporada import Temporada
+from classe import Classe
 
 import os
 import pymysql
@@ -171,13 +172,13 @@ def api_temporada():
             db.close_connection()
             return response
         elif request.method == 'PUT':
-             content = request.json
-             temporada = Temporada(uuid, content['nome'], content['dtInicio'], content['dtFim'])
-             query = temporada.atualizar()
-             db.run_query(query=query)
-             response = get_response_msg(temporada.serialize(), HTTPStatus.OK)
-             db.close_connection()
-             return response
+            content = request.json
+            temporada = Temporada(uuid, content['nome'], content['dtInicio'], content['dtFim'])
+            query = temporada.atualizar()
+            db.run_query(query=query)
+            response = get_response_msg(temporada.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
         else:
             print(1)
     except pymysql.MySQLError as sqle:
@@ -220,20 +221,78 @@ def api_grid():
             return response
         elif request.method == 'POST':
             content = request.json
-            grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['diaDaSemana'], content['linkOnboard'])
+            grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['diaDaSemana'],
+                        content['linkOnboard'])
             query = grid.criar()
             db.run_query(query=query)
             response = get_response_msg(grid.serialize(), HTTPStatus.OK)
             db.close_connection()
             return response
         elif request.method == 'PUT':
-             content = request.json
-             grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['diaDaSemana'], content['linkOnboard'])
-             query = grid.atualizar()
-             db.run_query(query=query)
-             response = get_response_msg(grid.serialize(), HTTPStatus.OK)
-             db.close_connection()
-             return response
+            content = request.json
+            grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['diaDaSemana'],
+                        content['linkOnboard'])
+            query = grid.atualizar()
+            db.run_query(query=query)
+            response = get_response_msg(grid.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        else:
+            print(1)
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
+## /api/v1/grids
+@app.route(f"{route_prefix}/classes", methods=['GET'])
+def api_classes():
+    try:
+        classes = []
+        query = 'SELECT BIN_TO_UUID(uuid), nome FROM classe'
+        records = db.run_query(query=query)
+        for row in records:
+            classe = Classe(row[0], row[1])
+            classes.append(classe.serialize())
+        response = get_response_msg(classes, HTTPStatus.OK)
+        db.close_connection()
+        return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
+## /api/v1/temporada
+@app.route(f"{route_prefix}/classe", methods=['GET', 'POST', 'PUT'])
+def api_classe():
+    try:
+        uuid = request.args.get('uuid', type=str)
+        if request.method == 'GET':
+            classe = Classe(uuid)
+            query = classe.selecionar()
+            records = db.run_query(query=query)
+            classe.set_informacoes(records[0])
+            response = get_response_msg(classe.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'POST':
+            content = request.json
+            classe = Classe(uuid, content['nome'])
+            query = classe.criar()
+            db.run_query(query=query)
+            response = get_response_msg(classe.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'PUT':
+            content = request.json
+            classe = Classe(uuid, content['nome'])
+            query = classe.atualizar()
+            db.run_query(query=query)
+            response = get_response_msg(classe.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
         else:
             print(1)
     except pymysql.MySQLError as sqle:
