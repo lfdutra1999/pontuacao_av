@@ -186,6 +186,62 @@ def api_temporada():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
+## /api/v1/grids
+@app.route(f"{route_prefix}/grids", methods=['GET'])
+def api_grids():
+    try:
+        grids = []
+        query = 'SELECT UUID_TO_BIN(uuid), UUID_TO_BIN(temporada_uuid), nome, simulador, dia_da_semana, link_onboard FROM grid'
+        records = db.run_query(query=query)
+        for row in records:
+            grid = Grid(row[0], row[1], row[2], row[3], row[4], row[5])
+            grids.append(grid.serialize())
+        response = get_response_msg(grids, HTTPStatus.OK)
+        db.close_connection()
+        return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
+## /api/v1/temporada
+@app.route(f"{route_prefix}/grid", methods=['GET', 'POST', 'PUT'])
+def api_grid():
+    try:
+        uuid = request.args.get('uuid', type=str)
+        if request.method == 'GET':
+            grid = Grid(uuid)
+            query = grid.selecionar()
+            records = db.run_query(query=query)
+            grid.set_informacoes(records[0])
+            response = get_response_msg(grid.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'POST':
+            content = request.json
+            grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['dia_da_semana'], content['link_onboard'])
+            query = grid.criar()
+            db.run_query(query=query)
+            response = get_response_msg(grid.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'PUT':
+             content = request.json
+             grid = Grid(uuid, content['temporada_uuid'], content['nome'], content['simulador'], content['dia_da_semana'], content['link_onboard'])
+             query = grid.atualizar()
+             db.run_query(query=query)
+             response = get_response_msg(grid.serialize(), HTTPStatus.OK)
+             db.close_connection()
+             return response
+        else:
+            print(1)
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
 ## /api/v1/health
 @app.route(f"{route_prefix}/health", methods=['GET'])
 def health():

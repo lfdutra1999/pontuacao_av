@@ -24,18 +24,18 @@ CREATE TABLE piloto_informacoes (
     FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
+CREATE TABLE equipe (
+    uuid BINARY(16) PRIMARY KEY,
+    nome VARCHAR(128) NOT NULL,
+    foto varchar(128),
+    UNIQUE (nome)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
 CREATE TABLE temporada (
     uuid BINARY(16) PRIMARY KEY,
     nome VARCHAR(128) NOT NULL,
     dtInicio DATE NOT NULL,
     dtFim DATE NOT NULL,
-    UNIQUE (nome)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
-
-CREATE TABLE equipe (
-    uuid BINARY(16) PRIMARY KEY,
-    nome VARCHAR(128) NOT NULL,
-    foto varchar(128),
     UNIQUE (nome)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
@@ -48,3 +48,45 @@ CREATE TABLE piloto_equipe_temporada (
     FOREIGN KEY (equipe_uuid) REFERENCES equipe(uuid),
     FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE grid (
+    uuid BINARY(16) PRIMARY KEY,
+    temporada_uuid BINARY(16),
+    nome VARCHAR(64) UNIQUE,
+    simulador VARCHAR(16) NOT NULL,
+    dia_da_semana VARCHAR(32) NOT NULL,
+    link_onboard VARCHAR(255) NOT NULL,
+    FOREIGN KEY (temporada_uuid) REFERENCES temporada(uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE categoria (
+    uuid BINARY(16) PRIMARY KEY,
+    grid_uuid BINARY(16),
+    nome VARCHAR(64),
+    horario VARCHAR(5) NOT NULL,
+    FOREIGN KEY (grid_uuid) REFERENCES grid(uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE classe (
+    uuid BINARY(16) PRIMARY KEY,
+    nome VARCHAR(64)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE carro (
+    uuid BINARY(16) PRIMARY KEY,
+    classe_uuid BINARY(16),
+    nome VARCHAR(64),
+    FOREIGN KEY (classe_uuid) REFERENCES classe(uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+CREATE TABLE categoria_carros (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    categoria_uuid BINARY(16),
+    classe_uuid BINARY(16),
+    carro_uuid BINARY(16),
+    FOREIGN KEY (categoria_uuid) REFERENCES grid(uuid),
+    FOREIGN KEY (classe_uuid) REFERENCES classe(uuid),
+    FOREIGN KEY (carro_uuid) REFERENCES carro(uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
+
+
