@@ -174,8 +174,8 @@ def api_temporada():
              content = request.json
              temporada = Temporada(uuid, content['nome'], content['dtInicio'], content['dtFim'])
              query = temporada.atualizar()
-             db.run_query(query=query)
-             response = get_response_msg(temporada.serialize(), HTTPStatus.OK)
+             dados = db.run_query(query=query)
+             response = get_response_msg(dados, HTTPStatus.OK)
              db.close_connection()
              return response
         else:
