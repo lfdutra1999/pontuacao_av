@@ -128,6 +128,25 @@ def api_login():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
+## /api/v1/temporadas
+@app.route(f"{route_prefix}/temporadas", methods=['GET'])
+def api_temporadas():
+    try:
+        temporadas = []
+        query = 'SELECT BIN_TO_UUID(uuid), nome,  DATE_FORMAT(dtInicio, \"%Y-%m-%d\"), DATE_FORMAT(dtFim, \"%Y-%m-%d\") from temporada'
+        records = db.run_query(query=query)
+        for row in records:
+            temporada = Temporada(row[0], row[1], row[2], row[3])
+            temporadas.append(temporada.serialize())
+        response = get_response_msg(temporadas, HTTPStatus.OK)
+        db.close_connection()
+        return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
 ## /api/v1/temporada
 @app.route(f"{route_prefix}/temporada", methods=['GET', 'POST', 'PUT'])
 def api_temporada():
