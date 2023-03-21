@@ -5,7 +5,7 @@ class Classe:
         self.imagem = None
 
     def criar(self):
-        return "INSERT INTO classe VALUES (UUID_TO_BIN(\'{uuid}\'), \'{nome}\')".format(uuid=self.uuid, nome=self.nome)
+        return "INSERT INTO classe (uuid, nome) VALUES (UUID_TO_BIN(\'{uuid}\'), \'{nome}\')".format(uuid=self.uuid, nome=self.nome)
 
     def atualizar(self):
         return "UPDATE classe SET nome=\'{nome}\' where BIN_TO_UUID(uuid) = \'{uuid}\'".format(uuid=self.uuid,
