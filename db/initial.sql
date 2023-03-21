@@ -1,5 +1,5 @@
 USE rpmesports;
-drop table piloto_informacoes, piloto;
+drop table piloto_informacoes, piloto, equipe, temporada, piloto_equipe_temporada, grid, categoria, classe, carro, categoria_carros;
 CREATE TABLE piloto (
     uuid BINARY(16) PRIMARY KEY,
     username VARCHAR(128) NOT NULL UNIQUE,
@@ -20,14 +20,14 @@ CREATE TABLE piloto_informacoes (
     estado VARCHAR(2),
     controlador VARCHAR(128),
     linkcanal VARCHAR(128),
-    foto varchar(128),
+    foto varchar(255),
     FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
 CREATE TABLE equipe (
     uuid BINARY(16) PRIMARY KEY,
     nome VARCHAR(128) NOT NULL,
-    foto varchar(128),
+    foto varchar(255),
     UNIQUE (nome)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
@@ -56,6 +56,7 @@ CREATE TABLE grid (
     simulador VARCHAR(16) NOT NULL,
     dia_da_semana VARCHAR(32) NOT NULL,
     link_onboard VARCHAR(255) NOT NULL,
+    imagem VARCHAR(255),
     FOREIGN KEY (temporada_uuid) REFERENCES temporada(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
@@ -69,13 +70,15 @@ CREATE TABLE categoria (
 
 CREATE TABLE classe (
     uuid BINARY(16) PRIMARY KEY,
-    nome VARCHAR(64)
+    nome VARCHAR(64) UNIQUE,
+    imagem VARCHAR(255)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
 CREATE TABLE carro (
     uuid BINARY(16) PRIMARY KEY,
     classe_uuid BINARY(16),
     nome VARCHAR(64),
+    imagem VARCHAR(255),
     FOREIGN KEY (classe_uuid) REFERENCES classe(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 

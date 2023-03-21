@@ -301,6 +301,27 @@ def api_classe():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
+## /api/v1/uploadImagem
+@app.route(f"{route_prefix}/upload", methods=['POST'])
+def api_upload():
+    try:
+        type = request.args.get('type', type=str)
+        uuid = request.args.get('uuid', type=str)
+        content = request.json
+        query = ""
+        if type == 'Classe':
+            classe = Classe(uuid)
+            query = classe.upload_imagem(content['imagem'])
+        db.run_query(query=query)
+        response = get_response_msg("Imagem atualizada!", HTTPStatus.OK)
+        db.close_connection()
+        return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
 ## /api/v1/health
 @app.route(f"{route_prefix}/health", methods=['GET'])
 def health():
