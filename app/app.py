@@ -296,6 +296,7 @@ def api_classe():
         else:
             print(1)
     except pymysql.MySQLError as sqle:
+        print(sqle)
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
     except Exception as e:
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
@@ -305,11 +306,11 @@ def api_classe():
 @app.route(f"{route_prefix}/upload", methods=['POST'])
 def api_upload():
     try:
-        tipo = request.args.get('type', type=str)
+        tipo = request.args.get('tipo', type=str)
         uuid = request.args.get('uuid', type=str)
         content = request.json
         query = ""
-        if tipo == 'Classe':
+        if tipo == 'classe':
             classe = Classe(uuid)
             query = classe.upload_imagem(content['imagem'])
         db.run_query(query=query)
