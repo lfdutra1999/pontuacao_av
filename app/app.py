@@ -305,11 +305,11 @@ def api_classe():
 @app.route(f"{route_prefix}/upload", methods=['POST'])
 def api_upload():
     try:
-        type = request.args.get('type', type=str)
+        tipo = request.args.get('type', type=str)
         uuid = request.args.get('uuid', type=str)
         content = request.json
         query = ""
-        if type == 'Classe':
+        if tipo == 'Classe':
             classe = Classe(uuid)
             query = classe.upload_imagem(content['imagem'])
         db.run_query(query=query)
