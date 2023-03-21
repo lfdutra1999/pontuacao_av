@@ -250,10 +250,10 @@ def api_grid():
 def api_classes():
     try:
         classes = []
-        query = 'SELECT BIN_TO_UUID(uuid), nome FROM classe'
+        query = 'SELECT BIN_TO_UUID(uuid), nome, imagem FROM classe'
         records = db.run_query(query=query)
         for row in records:
-            classe = Classe(row[0], row[1])
+            classe = Classe(row[0], row[1], row[2])
             classes.append(classe.serialize())
         response = get_response_msg(classes, HTTPStatus.OK)
         db.close_connection()

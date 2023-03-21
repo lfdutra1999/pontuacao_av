@@ -1,8 +1,8 @@
 class Classe:
-    def __init__(self, uuid, nome=None):
+    def __init__(self, uuid, nome=None, imagem=None):
         self.uuid = uuid
         self.nome = nome
-        self.imagem = None
+        self.imagem = imagem
 
     def criar(self):
         return "INSERT INTO classe (uuid, nome) VALUES (UUID_TO_BIN(\'{uuid}\'), \'{nome}\')".format(uuid=self.uuid, nome=self.nome)
