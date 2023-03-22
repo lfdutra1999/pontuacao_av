@@ -20,11 +20,11 @@ class Grid:
                "FROM grid WHERE BIN_TO_UUID(uuid) = \'{uuid}\'".format(uuid=self.uuid)
 
     def criar(self):
-        return "INSERT INTO grid VALUES (UUID_TO_BIN(\'{uuid}\'), UUID_TO_BIN(\'{temporada_uuid}\'), \'{nome}\', \'{simulador}\'," \
-               " \'{dia_da_semana}\', \'{link_onboard}\')".format(uuid=self.uuid, temporada_uuid=self.temporada_uuid,
-                                                                  nome=self.nome, simulador=self.simulador,
-                                                                  dia_da_semana=self.dia_da_semana,
-                                                                  link_onboard=self.link_onboard)
+        return "INSERT INTO grid (uuid, temporada_uuid, nome, simulador, dia_dat_semana, link_onboard) VALUES (UUID_TO_BIN(\'{uuid}\')," \
+               " UUID_TO_BIN(\'{temporada_uuid}\'), \'{nome}\', \'{simulador}\', \'{dia_da_semana}\', \'{link_onboard}\')".format(
+            uuid=self.uuid, temporada_uuid=self.temporada_uuid, nome=self.nome, simulador=self.simulador,
+            dia_da_semana=self.dia_da_semana,
+            link_onboard=self.link_onboard)
 
     def atualizar(self):
         return "UPDATE grid SET temporada_uuid=UUID_TO_BIN(\'{temporada_uuid}\'), nome=\'{nome}\', simulador=\'{simulador}\'," \
