@@ -6,6 +6,7 @@ from bateria import Bateria
 from grid import Grid
 from temporada import Temporada
 from classe import Classe
+from carro import Carro
 
 import os
 import pymysql
@@ -302,6 +303,64 @@ def api_classe():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
+## /api/v1/grids
+@app.route(f"{route_prefix}/carros", methods=['GET'])
+def api_carros():
+    try:
+        carros = []
+        query = 'SELECT BIN_TO_UUID(uuid), BIN_TO_UUID(classe_uuid), nome, imagem FROM carro'
+        records = db.run_query(query=query)
+        for row in records:
+            carro = Carro(row[0], row[1], row[2], row[3])
+            carros.append(carro.serialize())
+        response = get_response_msg(carros, HTTPStatus.OK)
+        db.close_connection()
+        return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
+## /api/v1/temporada
+@app.route(f"{route_prefix}/carro", methods=['GET', 'POST', 'PUT'])
+def api_carro():
+    try:
+        uuid = request.args.get('uuid', type=str)
+        classe_uuid = request.args.get('classeUuid', type=str)
+        if request.method == 'GET':
+            carro = Carro(uuid, classe_uuid)
+            query = carro.selecionar()
+            records = db.run_query(query=query)
+            carro.set_informacoes(records[0])
+            response = get_response_msg(carro.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'POST':
+            content = request.json
+            carro = Carro(uuid, classe_uuid, content['nome'])
+            query = carro.criar()
+            db.run_query(query=query)
+            response = get_response_msg(carro.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'PUT':
+            content = request.json
+            carro = Carro(uuid, classe_uuid, content['nome'])
+            query = carro.atualizar()
+            db.run_query(query=query)
+            response = get_response_msg(carro.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        else:
+            print(1)
+    except pymysql.MySQLError as sqle:
+        print(sqle)
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
 ## /api/v1/uploadImagem
 @app.route(f"{route_prefix}/upload", methods=['POST'])
 def api_upload():
@@ -313,6 +372,9 @@ def api_upload():
         if tipo == 'classe':
             classe = Classe(uuid)
             query = classe.upload_imagem(content['imagem'])
+        if tipo == 'carro':
+            carro = Carro(uuid, content['classe_uuid'])
+            query = carro.upload_imagem(content['imagem'])
         db.run_query(query=query)
         response = get_response_msg("Imagem atualizada!", HTTPStatus.OK)
         db.close_connection()
