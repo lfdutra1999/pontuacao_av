@@ -307,8 +307,12 @@ def api_classe():
 @app.route(f"{route_prefix}/carros", methods=['GET'])
 def api_carros():
     try:
+        class_uuid = request.args.get('classUuid')
         carros = []
-        query = 'SELECT BIN_TO_UUID(uuid), BIN_TO_UUID(classe_uuid), nome, imagem FROM carro'
+        if class_uuid is not None:
+            query = f'SELECT BIN_TO_UUID(uuid), BIN_TO_UUID(classe_uuid), nome, imagem FROM carro WHERE BIN_TO_UUID(classe_uuid) = \'{class_uuid}\''
+        else:
+            query = 'SELECT BIN_TO_UUID(uuid), BIN_TO_UUID(classe_uuid), nome, imagem FROM carro'
         records = db.run_query(query=query)
         for row in records:
             carro = Carro(row[0], row[1], row[2], row[3])
