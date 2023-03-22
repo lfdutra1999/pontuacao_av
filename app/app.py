@@ -7,6 +7,7 @@ from grid import Grid
 from temporada import Temporada
 from classe import Classe
 from carro import Carro
+from pista import Pista
 
 import os
 import pymysql
@@ -207,7 +208,7 @@ def api_grids():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
-## /api/v1/temporada
+## /api/v1/grid
 @app.route(f"{route_prefix}/grid", methods=['GET', 'POST', 'PUT'])
 def api_grid():
     try:
@@ -246,7 +247,7 @@ def api_grid():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
-## /api/v1/grids
+## /api/v1/classes
 @app.route(f"{route_prefix}/classes", methods=['GET'])
 def api_classes():
     try:
@@ -265,7 +266,7 @@ def api_classes():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
-## /api/v1/temporada
+## /api/v1/classe
 @app.route(f"{route_prefix}/classe", methods=['GET', 'POST', 'PUT'])
 def api_classe():
     try:
@@ -303,7 +304,7 @@ def api_classe():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
-## /api/v1/grids
+## /api/v1/carros
 @app.route(f"{route_prefix}/carros", methods=['GET'])
 def api_carros():
     try:
@@ -326,7 +327,7 @@ def api_carros():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
-## /api/v1/temporada
+## /api/v1/carro
 @app.route(f"{route_prefix}/carro", methods=['GET', 'POST', 'PUT'])
 def api_carro():
     try:
@@ -365,6 +366,63 @@ def api_carro():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
+## /api/v1/pistas
+@app.route(f"{route_prefix}/pistas", methods=['GET'])
+def api_pistas():
+    try:
+        pistas = []
+        query = f'SELECT BIN_TO_UUID(uuid), nome, pais, imagem FROM pista'
+        records = db.run_query(query=query)
+        for row in records:
+            pista = Pista(row[0], row[1], row[2], row[3])
+            pistas.append(pista.serialize())
+        response = get_response_msg(pistas, HTTPStatus.OK)
+        db.close_connection()
+        return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
+## /api/v1/pista
+@app.route(f"{route_prefix}/pista", methods=['GET', 'POST', 'PUT'])
+def api_pista():
+    try:
+        uuid = request.args.get('uuid', type=str)
+        if request.method == 'GET':
+            pista = Pista(uuid)
+            query = pista.selecionar()
+            records = db.run_query(query=query)
+            pista.set_informacoes(records[0])
+            response = get_response_msg(pista.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'POST':
+            content = request.json
+            pista = Pista(uuid, content['nome'], content['pais'])
+            query = pista.criar()
+            db.run_query(query=query)
+            response = get_response_msg(pista.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'PUT':
+            content = request.json
+            pista = Pista(uuid, content['nome'], content['pais'])
+            query = pista.atualizar()
+            db.run_query(query=query)
+            response = get_response_msg(pista.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        else:
+            print(1)
+    except pymysql.MySQLError as sqle:
+        print(sqle)
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
 ## /api/v1/uploadImagem
 @app.route(f"{route_prefix}/upload", methods=['POST'])
 def api_upload():
@@ -379,6 +437,9 @@ def api_upload():
         if tipo == 'carro':
             carro = Carro(uuid, content['classe_uuid'])
             query = carro.upload_imagem(content['imagem'])
+        if tipo == 'pista':
+            pista = Pista(uuid)
+            query = pista.upload_imagem(content['imagem'])
         db.run_query(query=query)
         response = get_response_msg("Imagem atualizada!", HTTPStatus.OK)
         db.close_connection()

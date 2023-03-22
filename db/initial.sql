@@ -92,4 +92,19 @@ CREATE TABLE categoria_carros (
     FOREIGN KEY (carro_uuid) REFERENCES carro(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
+CREATE TABLE pista (
+    uuid BINARY(16) PRIMARY KEY,
+    nome VARCHAR(64),
+    pais VARCHAR(64),
+    imagem VARCHAR(255)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
+CREATE TABLE etapa (
+    uuid BINARY(16) PRIMARY KEY,
+    categoria_uuid BINARY(16),
+    pista_uuid BINARY(16),
+    nome VARCHAR(64),
+    periodo INT,
+    FOREIGN KEY (categoria_uuid) REFERENCES categoria(uuid),
+    FOREIGN KEY (pista_uuid) REFERENCES pista(uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
