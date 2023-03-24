@@ -39,12 +39,12 @@ CREATE TABLE temporada (
     UNIQUE (nome)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;
 
-CREATE TABLE piloto_equipe_temporada (
+CREATE TABLE piloto_equipe_categoria (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    temporada_uuid BINARY(16),
+    categoria_uuid BINARY(16),
     equipe_uuid BINARY(16),
     piloto_uuid BINARY(16),
-    FOREIGN KEY (temporada_uuid) REFERENCES temporada(uuid),
+    FOREIGN KEY (categoria_uuid) REFERENCES categoria(uuid),
     FOREIGN KEY (equipe_uuid) REFERENCES equipe(uuid),
     FOREIGN KEY (piloto_uuid) REFERENCES piloto(uuid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_ci;

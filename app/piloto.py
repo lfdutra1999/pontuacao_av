@@ -41,6 +41,7 @@ class Piloto:
         if out[7] is not None: self.estado = out[7]
         if out[8] is not None: self.controlador = out[8]
         if out[9] is not None: self.linkcanal = out[9]
+        if out[10] is not None: self.foto = out[10]
 
     def cadastrar_informacoes(self, nome=None, sobrenome=None, nickname=None, steamid=None, whatsapp=None,
                               chavepíx=None, cidade=None, estado=None,
@@ -57,7 +58,7 @@ class Piloto:
         if linkcanal != '' and linkcanal is not None: self.linkcanal = linkcanal
 
     def select_informacoes(self):
-        return "SELECT nome, sobrenome, nickname, steamid, whatsapp, chavepix, cidade, estado, controlador, linkcanal " \
+        return "SELECT nome, sobrenome, nickname, steamid, whatsapp, chavepix, cidade, estado, controlador, linkcanal, foto " \
                "FROM piloto_informacoes WHERE piloto_uuid = UUID_TO_BIN(\'{}\')".format(self.uuid)
 
     def existe(self, cnx):
@@ -92,6 +93,9 @@ class Piloto:
 
     def atualiza_info(self, coluna, valor):
         return "UPDATE piloto_informacoes set {coluna}=\'{valor}\'".format(coluna=coluna, valor=valor)
+
+    def upload_foto(self, foto):
+        return "UPDATE piloto_informacoes SET foto=\'{foto}\' WHERE BIN_TO_UUID=\'{uuid}\'".format(uuid=self.uuid, foto=foto)
 
     def serialize(self):
         return {

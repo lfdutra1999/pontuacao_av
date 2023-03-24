@@ -3,8 +3,9 @@ from equipe import Equipe
 from piloto import Piloto
 from etapa import Etapa
 from bateria import Bateria
-from grid import Grid
 from temporada import Temporada
+from grid import Grid
+from categoria import Categoria
 from classe import Classe
 from carro import Carro
 from pista import Pista
@@ -247,6 +248,68 @@ def api_grid():
         abort(HTTPStatus.BAD_REQUEST, description=str(e))
 
 
+## /api/v1/categorias
+@app.route(f"{route_prefix}/categorias", methods=['GET'])
+def api_categorias():
+    try:
+        grid_uuid = request.args.get('gridUuid')
+        categorias = []
+        if grid_uuid is not None:
+            query = f'SELECT BIN_TO_UUID(uuid), BIN_TO_UUID(grid_uuid), nome, horario FROM categoria WHERE BIN_TO_UUID(grid_uui) = \'{grid_uuid}\''
+        else:
+            query = 'SELECT BIN_TO_UUID(uuid), BIN_TO_UUID(grid_uuid), nome, horario FROM categoria'
+        records = db.run_query(query=query)
+        for row in records:
+            categoria = Categoria(row[0], row[1], row[2], row[3])
+            categorias.append(categoria.serialize())
+        response = get_response_msg(categorias, HTTPStatus.OK)
+        db.close_connection()
+        return response
+    except pymysql.MySQLError as sqle:
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
+## /api/v1/categoria
+@app.route(f"{route_prefix}/carro", methods=['GET', 'POST', 'PUT'])
+def api_categoria():
+    try:
+        uuid = request.args.get('uuid', type=str)
+        grid_uuid = request.args.get('gridUuid', type=str)
+        if request.method == 'GET':
+            categoria = Categoria(uuid, grid_uuid)
+            query = categoria.selecionar()
+            records = db.run_query(query=query)
+            categoria.set_informacoes(records[0])
+            response = get_response_msg(categoria.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'POST':
+            content = request.json
+            categoria = Categoria(uuid, grid_uuid, content['nome'], content['horario'])
+            query = categoria.criar()
+            db.run_query(query=query)
+            response = get_response_msg(categoria.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        elif request.method == 'PUT':
+            content = request.json
+            categoria = Categoria(uuid, grid_uuid, content['nome'], content['horario'])
+            query = categoria.atualizar()
+            db.run_query(query=query)
+            response = get_response_msg(categoria.serialize(), HTTPStatus.OK)
+            db.close_connection()
+            return response
+        else:
+            print(1)
+    except pymysql.MySQLError as sqle:
+        print(sqle)
+        abort(HTTPStatus.INTERNAL_SERVER_ERROR, description=str(sqle))
+    except Exception as e:
+        abort(HTTPStatus.BAD_REQUEST, description=str(e))
+
+
 ## /api/v1/classes
 @app.route(f"{route_prefix}/classes", methods=['GET'])
 def api_classes():
@@ -431,15 +494,9 @@ def api_upload():
         uuid = request.args.get('uuid', type=str)
         content = request.json
         query = ""
-        if tipo == 'classe':
-            classe = Classe(uuid)
-            query = classe.upload_imagem(content['imagem'])
-        if tipo == 'carro':
-            carro = Carro(uuid, content['classe_uuid'])
-            query = carro.upload_imagem(content['imagem'])
-        if tipo == 'pista':
-            pista = Pista(uuid)
-            query = pista.upload_imagem(content['imagem'])
+        if tipo == 'piloto':
+            piloto = Piloto(uuid)
+            query = piloto.upload_foto(content['imagem'])
         db.run_query(query=query)
         response = get_response_msg("Imagem atualizada!", HTTPStatus.OK)
         db.close_connection()
